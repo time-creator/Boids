@@ -34,6 +34,7 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((800, 500))
     screen.fill((255, 255, 255))
+    print(screen.get_size())
     pygame.display.set_caption("Basic Pygame program")
 
     # Create some Boids
@@ -49,6 +50,9 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return
 
         # This line resets the screen after every step; delete to show trails
         screen.fill((255, 255, 255))
