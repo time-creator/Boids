@@ -1,45 +1,19 @@
-import math
 import pygame
-
-print(pygame.__version__)
-
-
-class Boid:
-
-    def __init__(self, x, y, speed):
-        self.x = x
-        self.y = y
-        self.speed = speed
-        self.direction = 90
-
-    def update(self):
-        self.x += int(self.speed[0] * math.cos(math.radians(self.direction))
-                      - self.speed[1] * math.sin(math.radians(self.direction)))
-        self.y += int(self.speed[0] * math.sin(math.radians(self.direction))
-                      + self.speed[1] * math.cos(math.radians(self.direction)))
-
-        if self.x > 800:
-            self.x = 0
-        elif self.x < 0:
-            self.x = 800
-
-        if self.y > 500:
-            self.y = 0
-        elif self.y < 0:
-            self.y = 500
+import random
+from boid import Boid
 
 
 def main():
     # Initialise the screen
     pygame.init()
-    screen = pygame.display.set_mode((800, 500))
+    screen = pygame.display.set_mode((1200, 750))
     screen.fill((255, 255, 255))
     print(screen.get_size())
     pygame.display.set_caption("Basic Pygame program")
 
     # Create some Boids
-    birds = [Boid(400, 250, (3, 1)), Boid(400, 250, (-3, 2))]
-    for bird in birds:
+    flock = [Boid(random.randint(50, 1150), random.randint(50, 700), [3, 0]) for i in range(10)]
+    for bird in flock:
         pygame.draw.circle(screen, pygame.Color('red'), (bird.x, bird.y), 3)
 
     pygame.display.flip()
@@ -57,9 +31,10 @@ def main():
         # This line resets the screen after every step; delete to show trails
         screen.fill((255, 255, 255))
 
-        for bird in birds:
-            bird.update()
+        for bird in flock:
+            # equals "show"
             pygame.draw.circle(screen, pygame.Color('red'), (bird.x, bird.y), 3)
+            bird.update()
 
         pygame.display.flip()
 
