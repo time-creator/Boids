@@ -9,7 +9,11 @@ class Boid(object):
         self.velocity = velocity
         self.acceleration = [0, 0]
         self.direction = 0
-        self.maxspeed = 5
+        self.max_speed = 5
+
+        self.color = 'red'
+
+        self.ill_since = 0
 
     def update(self):
         self.x += int(self.velocity[0] * math.cos(math.radians(self.direction))
@@ -22,5 +26,8 @@ class Boid(object):
 
         # limit speed
         norm_velocity = math.sqrt(self.velocity[0]**2 + self.velocity[1]**2)
-        if norm_velocity > self.maxspeed:
-            self.velocity = [v / norm_velocity * self.maxspeed for v in self.velocity]
+        if norm_velocity > self.max_speed:
+            self.velocity = [v / norm_velocity * self.max_speed for v in self.velocity]
+
+        if self.color == 'green':
+            self.ill_since += 1
