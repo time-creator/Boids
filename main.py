@@ -3,7 +3,7 @@ import random
 from boid import Boid
 
 
-WIDTH = 600
+WIDTH = 1000
 HEIGHT = 600
 FPS_CLOCK = pygame.time.Clock()
 FPS = 30
