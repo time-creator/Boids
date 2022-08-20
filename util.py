@@ -27,6 +27,7 @@ def magnitude(v: Vector) -> float:
 
 
 def normalize(v: Vector) -> Vector:
+    """Normalizes the Vector to have a magnitude of 1."""
     magnitude_v = magnitude(v)
     return [v_i / magnitude_v for v_i in v]
 
