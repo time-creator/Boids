@@ -81,13 +81,20 @@ class Boid(pygame.sprite.Sprite):
         return away_vector
 
     def rule_three(self, boids) -> list[float]:
-        size = len(boids)
-        average_neighbour_vector = [0, 0]
+        """
+        Rule 3: Boids try to match velocity with near boids.
+
+        :param boids: neighbouring boids
+        :return: velocity for rule three
+        """
+        perceived_velocity = [0, 0]
         for boid in boids:
-            average_neighbour_vector = [sum(x) for x in zip(average_neighbour_vector, boid.velocity)]
-        average_update_x = (self.velocity[0] - (average_neighbour_vector[0] / size)) / 8
-        average_update_y = (self.velocity[1] - (average_neighbour_vector[1] / size)) / 8
-        return [average_update_x, average_update_y]
+            if boid != self:
+                perceived_velocity = vector_add(perceived_velocity, boid.velocity)
+        perceived_velocity = scalar_division(perceived_velocity, len(boids) - 1)
+        velocity_diff = vector_sub(perceived_velocity, self.velocity)
+        percentage_velocity = scalar_division(velocity_diff, 8)
+        return percentage_velocity
 
 
 class Flock(pygame.sprite.Group):
@@ -102,4 +109,4 @@ class Flock(pygame.sprite.Group):
         for sprite in self.sprites():
             if isinstance(sprite, Boid):
                 # Update/move all boids in the flock.
-                sprite.update(self.sprites(), 0, 1, 0)
+                sprite.update(self.sprites(), 0, 0, 1)
