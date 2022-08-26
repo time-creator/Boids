@@ -16,6 +16,8 @@ class Boid(pygame.sprite.Sprite):
 
         self.velocity = [random.randrange(200), random.randrange(200)]
 
+        self.velocity_limit = 4
+
     def update(self, boid_neighbourhood, rule_one, rule_two, rule_three):
         # TODO: One problem might be, that in pygame (0, 0) is the top left. Does this influence velocities / movement?
         # -- Apply Rules ---
@@ -35,8 +37,8 @@ class Boid(pygame.sprite.Sprite):
         self.velocity = vector_add(self.velocity, self.boundary_checking())
 
         # --- Limiting Speed ---
-        if magnitude(self.velocity) > 2:
-            self.velocity = [(v / magnitude(self.velocity)) * 2 for v in self.velocity]
+        if magnitude(self.velocity) > self.velocity_limit:
+            self.velocity = [(v / magnitude(self.velocity)) * self.velocity_limit for v in self.velocity]
 
     def move(self):
         # --- Movement ---
@@ -91,7 +93,7 @@ class Boid(pygame.sprite.Sprite):
         return percentage_velocity
 
     def boundary_checking(self):
-        velocity = [0, 0]
+        velocity = self.velocity
         if self.rect.centerx < 0:
             velocity[0] = 10
         elif self.rect.centerx > WIDTH:
@@ -117,7 +119,7 @@ class Flock(pygame.sprite.Group):
         for sprite in self.sprites():
             if isinstance(sprite, Boid):
                 # Update/move all boids in the flock.
-                sprite.update(self.sprites(), 1, 1, 1)  # TODO: Currently looking at ALL other boids for applying rules.
+                sprite.update(self.sprites(), 0, 0, 1)  # TODO: Currently looking at ALL other boids for applying rules.
 
         for sprite in self.sprites():
             if isinstance(sprite, Boid):
