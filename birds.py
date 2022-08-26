@@ -49,7 +49,7 @@ class Boid(pygame.sprite.Sprite):
         :param boids: neighbouring boids
         :return: velocity for rule one
         """
-        size = len(boids)
+        size = len(boids) - 1
         # The centre of mass is the average position of neighbouring boids.
         perceived_centre_of_mass = [sum(b.rect.centerx for b in boids if b != self) / size,  # x coordinate
                                     sum(b.rect.centery for b in boids if b != self) / size]  # y coordinate
