@@ -2,7 +2,8 @@ import random
 
 import pygame
 
-from util import distance, magnitude, vector_add, vector_sub, scalar_division
+from util import magnitude, vector_add, vector_sub, scalar_division
+from settings import WIDTH, HEIGHT
 
 
 class Boid(pygame.sprite.Sprite):
@@ -11,9 +12,9 @@ class Boid(pygame.sprite.Sprite):
         super().__init__()
         self.image = pygame.surface.Surface((10, 10))
         self.image.fill(color)
-        self.rect = self.image.get_rect(center=(random.randrange(1280), random.randrange(720)))
+        self.rect = self.image.get_rect(center=(random.randrange(WIDTH), random.randrange(HEIGHT)))
 
-        self.velocity = [random.randrange(-200, 201), random.randrange(-200, 201)]
+        self.velocity = [0, 0]
 
     def update(self, boid_neighbourhood, rule_one, rule_two, rule_three):
         # TODO: One problem might be, that in pygame (0, 0) is the top left. Does this influence velocities / movement?
@@ -30,6 +31,9 @@ class Boid(pygame.sprite.Sprite):
         if rule_three:
             self.velocity = vector_add(self.velocity, vector_rule_three)
 
+        # --- Boundary Check ---
+        self.velocity = vector_add(self.velocity, self.boundary_checking())
+
         # --- Limiting Speed ---
         if magnitude(self.velocity) > 2:
             self.velocity = [(v / magnitude(self.velocity)) * 2 for v in self.velocity]
@@ -37,17 +41,6 @@ class Boid(pygame.sprite.Sprite):
         # --- Movement ---
         self.rect.centerx += self.velocity[0]
         self.rect.centery += self.velocity[1]
-
-        # --- Boundary Overflow ---
-        if self.rect.x > 1280:
-            self.rect.x = 0
-        if self.rect.x < 0:
-            self.rect.x = 1280
-
-        if self.rect.y > 720:
-            self.rect.y = 0
-        if self.rect.y < 0:
-            self.rect.y = 720
 
     def rule_one(self, boids) -> list[float]:
         """
@@ -96,6 +89,20 @@ class Boid(pygame.sprite.Sprite):
         percentage_velocity = scalar_division(velocity_diff, 8)
         return percentage_velocity
 
+    def boundary_checking(self):
+        velocity = [0, 0]
+        if self.rect.centerx < 0:
+            velocity[0] = 10
+        elif self.rect.centerx > WIDTH:
+            velocity[0] = -10
+
+        if self.rect.centery < 0:
+            velocity[1] = 10
+        elif self.rect.centery > HEIGHT:
+            velocity[1] = -10
+
+        return velocity
+
 
 class Flock(pygame.sprite.Group):
 
@@ -109,4 +116,4 @@ class Flock(pygame.sprite.Group):
         for sprite in self.sprites():
             if isinstance(sprite, Boid):
                 # Update/move all boids in the flock.
-                sprite.update(self.sprites(), 0, 0, 1)
+                sprite.update(self.sprites(), 1, 0, 0)
