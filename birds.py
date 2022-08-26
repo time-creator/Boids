@@ -2,7 +2,7 @@ import random
 
 import pygame
 
-from util import distance, vector_add, magnitude
+from util import distance, magnitude, vector_add, vector_sub, scalar_division
 
 
 class Boid(pygame.sprite.Sprite):
@@ -15,11 +15,11 @@ class Boid(pygame.sprite.Sprite):
 
         self.velocity = [random.randrange(-200, 201), random.randrange(-200, 201)]
 
-    def update(self, boids, rule_one, rule_two, rule_three):
+    def update(self, boid_neighbourhood, rule_one, rule_two, rule_three):
         # -- Apply Rules ---
-        vector_rule_one = self.rule_one(boids)
-        vector_rule_two = self.rule_two(boids)
-        vector_rule_three = self.rule_three(boids)
+        vector_rule_one = self.rule_one(boid_neighbourhood)
+        vector_rule_two = self.rule_two(boid_neighbourhood)
+        vector_rule_three = self.rule_three(boid_neighbourhood)
 
         # --- Update Movement Vector ---
         if rule_one:
@@ -49,10 +49,19 @@ class Boid(pygame.sprite.Sprite):
             self.rect.y = 720
 
     def rule_one(self, boids) -> list[float]:
+        """
+        Rule 1: Boids try to fly towards the centre of mass of neighbouring boids.
+
+        :param boids: neighbouring boids
+        :return: velocity for rule one
+        """
         size = len(boids)
-        centre_of_mass = [sum(s.rect.x for s in boids) / size, sum(s.rect.y for s in boids) / size]
-        difference_vector = [(centre_of_mass[0] - self.rect.x) / 10000, (centre_of_mass[1] - self.rect.y) / 10000]
-        return difference_vector
+        # The centre of mass is the average position of neighbouring boids.
+        perceived_centre_of_mass = [sum(b.rect.x for b in boids if b != self) / size,  # x coordinate
+                                    sum(b.rect.y for b in boids if b != self) / size]  # y coordinate
+        velocity = vector_sub(perceived_centre_of_mass, list(self.rect.center))
+        velocity_percentage = scalar_division(velocity, 100)  # to move 1% towards the perceived center of mass
+        return velocity_percentage
 
     def rule_two(self, boids) -> list[float]:
         away_vector = [0, 0]
@@ -83,4 +92,5 @@ class Flock(pygame.sprite.Group):
     def update(self):
         for sprite in self.sprites():
             if isinstance(sprite, Boid):
-                sprite.update(self.sprites(), 0, 1, 0)
+                # Update/move all boids in the flock.
+                sprite.update(self.sprites(), 1, 0, 0)
