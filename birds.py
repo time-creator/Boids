@@ -35,8 +35,8 @@ class Boid(pygame.sprite.Sprite):
             self.velocity = [(v / magnitude(self.velocity)) * 2 for v in self.velocity]
 
         # --- Movement ---
-        self.rect.x += self.velocity[0]
-        self.rect.y += self.velocity[1]
+        self.rect.centerx += self.velocity[0]
+        self.rect.centery += self.velocity[1]
 
         # --- Boundary Overflow ---
         if self.rect.x > 1280:
@@ -58,8 +58,8 @@ class Boid(pygame.sprite.Sprite):
         """
         size = len(boids)
         # The centre of mass is the average position of neighbouring boids.
-        perceived_centre_of_mass = [sum(b.rect.x for b in boids if b != self) / size,  # x coordinate
-                                    sum(b.rect.y for b in boids if b != self) / size]  # y coordinate
+        perceived_centre_of_mass = [sum(b.rect.centerx for b in boids if b != self) / size,  # x coordinate
+                                    sum(b.rect.centery for b in boids if b != self) / size]  # y coordinate
         velocity = vector_sub(perceived_centre_of_mass, list(self.rect.center))
         velocity_percentage = scalar_division(velocity, 100)  # to move 1% towards the perceived center of mass
         return velocity_percentage
