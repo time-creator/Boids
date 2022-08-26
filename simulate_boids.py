@@ -3,11 +3,7 @@ import sys
 import pygame
 
 from birds import Flock
-
-
-WIDTH = 1280
-HEIGHT = 720
-MAX_FPS = 60
+from settings import WIDTH, HEIGHT, MAX_FPS
 
 
 def main():
