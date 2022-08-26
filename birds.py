@@ -2,7 +2,7 @@ import random
 
 import pygame
 
-from util import magnitude, vector_add, vector_sub, scalar_division
+from util import magnitude, vector_add, vector_sub, scalar_division, distance
 from settings import WIDTH, HEIGHT
 
 
@@ -19,19 +19,17 @@ class Boid(pygame.sprite.Sprite):
         self.velocity_limit = 4
 
     def update(self, boid_neighbourhood, rule_one, rule_two, rule_three):
-        # TODO: One problem might be, that in pygame (0, 0) is the top left. Does this influence velocities / movement?
-        # -- Apply Rules ---
-        vector_rule_one = self.rule_one(boid_neighbourhood)
-        vector_rule_two = self.rule_two(boid_neighbourhood)
-        vector_rule_three = self.rule_three(boid_neighbourhood)
-
-        # --- Update Movement Vector ---
-        if rule_one:
-            self.velocity = vector_add(self.velocity, vector_rule_one)
-        if rule_two:
-            self.velocity = vector_add(self.velocity, vector_rule_two)
-        if rule_three:
-            self.velocity = vector_add(self.velocity, vector_rule_three)
+        # --- Apply Rules And Update Movement Vector ---
+        if boid_neighbourhood:
+            if rule_one:
+                vector_rule_one = self.rule_one(boid_neighbourhood)
+                self.velocity = vector_add(self.velocity, vector_rule_one)
+            if rule_two:
+                vector_rule_two = self.rule_two(boid_neighbourhood)
+                self.velocity = vector_add(self.velocity, vector_rule_two)
+            if rule_three:
+                vector_rule_three = self.rule_three(boid_neighbourhood)
+                self.velocity = vector_add(self.velocity, vector_rule_three)
 
         # --- Boundary Check ---
         self.velocity = vector_add(self.velocity, self.boundary_checking())
@@ -52,12 +50,12 @@ class Boid(pygame.sprite.Sprite):
         :param boids: neighbouring boids
         :return: velocity for rule one
         """
-        size = len(boids) - 1
+        size = len(boids)  # len(boids) - 1 if boids contains self
         # The centre of mass is the average position of neighbouring boids.
         perceived_centre_of_mass = [sum(b.rect.centerx for b in boids if b != self) / size,  # x coordinate
                                     sum(b.rect.centery for b in boids if b != self) / size]  # y coordinate
         velocity = vector_sub(perceived_centre_of_mass, list(self.rect.center))
-        velocity_percentage = scalar_division(velocity, 100)  # to move 1% towards the perceived center of mass
+        velocity_percentage = scalar_division(velocity, 400)  # to move 1% towards the perceived center of mass
         return velocity_percentage
 
     def rule_two(self, boids) -> list[float]:
@@ -71,10 +69,10 @@ class Boid(pygame.sprite.Sprite):
         for boid in boids:
             if boid != self:
                 diff_vector = vector_sub(list(boid.rect.center), list(self.rect.center))
-                if magnitude(diff_vector) < 20:
+                if magnitude(diff_vector) < 40:
                     # away_vector = away_vector - (boid position - self position)
                     away_vector = vector_sub(away_vector, diff_vector)
-        return away_vector
+        return scalar_division(away_vector, 20)
 
     def rule_three(self, boids) -> list[float]:
         """
@@ -87,7 +85,7 @@ class Boid(pygame.sprite.Sprite):
         for boid in boids:
             if boid != self:
                 perceived_velocity = vector_add(perceived_velocity, boid.velocity)
-        perceived_velocity = scalar_division(perceived_velocity, len(boids) - 1)
+        perceived_velocity = scalar_division(perceived_velocity, len(boids))  # len(boids) - 1 if self in boids
         velocity_diff = vector_sub(perceived_velocity, self.velocity)
         percentage_velocity = scalar_division(velocity_diff, 8)
         return percentage_velocity
@@ -119,7 +117,12 @@ class Flock(pygame.sprite.Group):
         for sprite in self.sprites():
             if isinstance(sprite, Boid):
                 # Update/move all boids in the flock.
-                sprite.update(self.sprites(), 0, 0, 1)  # TODO: Currently looking at ALL other boids for applying rules.
+                neighbourhood = []
+                for other_sprite in self.sprites():
+                    if distance(list(sprite.rect.center), list(other_sprite.rect.center)) < 50:
+                        if sprite != other_sprite:
+                            neighbourhood.append(other_sprite)
+                sprite.update(neighbourhood, 1, 1, 1)
 
         for sprite in self.sprites():
             if isinstance(sprite, Boid):
