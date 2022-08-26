@@ -16,6 +16,7 @@ class Boid(pygame.sprite.Sprite):
         self.velocity = [random.randrange(-200, 201), random.randrange(-200, 201)]
 
     def update(self, boid_neighbourhood, rule_one, rule_two, rule_three):
+        # TODO: One problem might be, that in pygame (0, 0) is the top left. Does this influence velocities / movement?
         # -- Apply Rules ---
         vector_rule_one = self.rule_one(boid_neighbourhood)
         vector_rule_two = self.rule_two(boid_neighbourhood)
@@ -64,11 +65,19 @@ class Boid(pygame.sprite.Sprite):
         return velocity_percentage
 
     def rule_two(self, boids) -> list[float]:
+        """
+        Rule 2: Boids try to keep a small distance away from other objects (including other boids).
+
+        :param boids: neighbouring boids
+        :return: velocity for rule two
+        """
         away_vector = [0, 0]
         for boid in boids:
-            if 0 < distance([self.rect.x, self.rect.y], [boid.rect.x, boid.rect.y]) < 20:
-                away_vector[0] -= self.rect.x - boid.rect.x
-                away_vector[1] -= self.rect.y - boid.rect.y
+            if boid != self:
+                diff_vector = vector_sub(list(boid.rect.center), list(self.rect.center))
+                if magnitude(diff_vector) < 20:
+                    # away_vector = away_vector - (boid position - self position)
+                    away_vector = vector_sub(away_vector, diff_vector)
         return away_vector
 
     def rule_three(self, boids) -> list[float]:
@@ -93,4 +102,4 @@ class Flock(pygame.sprite.Group):
         for sprite in self.sprites():
             if isinstance(sprite, Boid):
                 # Update/move all boids in the flock.
-                sprite.update(self.sprites(), 1, 0, 0)
+                sprite.update(self.sprites(), 0, 1, 0)
