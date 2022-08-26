@@ -14,7 +14,7 @@ class Boid(pygame.sprite.Sprite):
         self.image.fill(color)
         self.rect = self.image.get_rect(center=(random.randrange(WIDTH), random.randrange(HEIGHT)))
 
-        self.velocity = [0, 0]
+        self.velocity = [random.randrange(200), random.randrange(200)]
 
     def update(self, boid_neighbourhood, rule_one, rule_two, rule_three):
         # TODO: One problem might be, that in pygame (0, 0) is the top left. Does this influence velocities / movement?
@@ -38,6 +38,7 @@ class Boid(pygame.sprite.Sprite):
         if magnitude(self.velocity) > 2:
             self.velocity = [(v / magnitude(self.velocity)) * 2 for v in self.velocity]
 
+    def move(self):
         # --- Movement ---
         self.rect.centerx += self.velocity[0]
         self.rect.centery += self.velocity[1]
@@ -116,4 +117,8 @@ class Flock(pygame.sprite.Group):
         for sprite in self.sprites():
             if isinstance(sprite, Boid):
                 # Update/move all boids in the flock.
-                sprite.update(self.sprites(), 1, 0, 0)
+                sprite.update(self.sprites(), 1, 1, 1)  # TODO: Currently looking at ALL other boids for applying rules.
+
+        for sprite in self.sprites():
+            if isinstance(sprite, Boid):
+                sprite.move()
