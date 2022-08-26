@@ -19,6 +19,7 @@ def scalar_product(v: Vector, k: float) -> Vector:
 
 
 def scalar_division(v: Vector, k: float) -> Vector:
+    """Divides the elements of the vector v by the scalar k."""
     return [v_i / k for v_i in v]
 
 

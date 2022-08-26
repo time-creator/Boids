@@ -2,7 +2,7 @@ import sys
 
 import pygame
 
-from flock import Flock
+from birds import Flock
 
 
 WIDTH = 1280
@@ -29,8 +29,8 @@ def main():
         main_screen.fill('white')
 
         # -- Flock ---
-        flock.update()
         flock.draw(main_screen)
+        flock.update()
 
         pygame.display.update()
         clock.tick(MAX_FPS)
