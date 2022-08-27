@@ -13,7 +13,12 @@ def main():
     clock = pygame.time.Clock()
 
     # --- Flock init ---
-    flock = Flock(20, 'green')
+    flock = Flock(size=100,
+                  perception_radius=50,
+                  r1_factor=400,
+                  r2_factor=20,
+                  r3_factor=8,
+                  color='green')
 
     # --- Main Loop ---
     while True:
